@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import ReactPaginate from 'react-paginate';
+import Select from 'react-select';
 import { fetchItems, addItem, updateItem, deleteItem } from './services/api';
 import ItemModal from './components/ItemModal';
 import ItemTable from './components/ItemTable';
@@ -8,22 +8,36 @@ import './App.css';
 
 const App: React.FC = () => {
   const [items, setItems] = useState<any[]>([]);
-  const [pageCount, setPageCount] = useState(0);
+  const [filteredItems, setFilteredItems] = useState<any[]>([]);
   const [modalIsOpen, setModalIsOpen] = useState(false);
   const [currentItem, setCurrentItem] = useState<any>(null);
-  const [page, setPage] = useState(0);
   const [loading, setLoading] = useState(false);
+  const [payerOptions, setPayerOptions] = useState<any[]>([]);
+  const [selectedPayers, setSelectedPayers] = useState<any[]>([]);
 
   useEffect(() => {
-    loadItems(page + 1);
-  }, [page]);
+    loadItems();
+  }, []);
 
-  const loadItems = async (page: number) => {
+  useEffect(() => {
+    filterItems();
+  }, [selectedPayers, items]);
+
+  const loadItems = async () => {
     setLoading(true);
-    const data = await fetchItems(page, 10);
+    const data = await fetchItems();
     setItems(data);
-    setPageCount(5); // Example page count, should be set according to total items
+    setPayerOptions([...new Set(data.map((item: any) => item.payer))].map((payer: string) => ({ value: payer, label: payer })));
     setLoading(false);
+  };
+
+  const filterItems = () => {
+    if (selectedPayers.length > 0) {
+      const selectedPayerValues = selectedPayers.map(payer => payer.value);
+      setFilteredItems(items.filter(item => selectedPayerValues.includes(item.payer)));
+    } else {
+      setFilteredItems(items);
+    }
   };
 
   const handleAdd = () => {
@@ -44,14 +58,14 @@ const App: React.FC = () => {
       await addItem(item);
     }
     setModalIsOpen(false);
-    loadItems(page + 1);
+    loadItems();
     setLoading(false);
   };
 
   const handleDelete = async (id: number) => {
     setLoading(true);
     await deleteItem(id);
-    loadItems(page + 1);
+    loadItems();
     setLoading(false);
   };
 
@@ -61,21 +75,22 @@ const App: React.FC = () => {
         <h1 className="text-2xl mb-4">CRUD Application</h1>
         <button onClick={handleAdd} className="bg-green-500 text-white p-2 rounded">Add Item</button>
       </div>
+      <div className="mb-4">
+        <Select
+          isMulti
+          options={payerOptions}
+          onChange={(selected) => setSelectedPayers(selected || [])}
+          className="w-1/4"
+          placeholder="Filter by Payer"
+        />
+      </div>
       {loading ? (
         <div className="flex justify-center">
           <TailSpin height={50} width={50} color="#4A90E2" />
         </div>
       ) : (
-        <ItemTable items={items} onEdit={handleEdit} onDelete={handleDelete} />
+        <ItemTable items={filteredItems} onEdit={handleEdit} onDelete={handleDelete} />
       )}
-      <ReactPaginate
-        previousLabel={'Previous'}
-        nextLabel={'Next'}
-        pageCount={pageCount}
-        onPageChange={(selectedItem) => setPage(selectedItem.selected)}
-        containerClassName={'pagination'}
-        activeClassName={'active'}
-      />
       <ItemModal
         isOpen={modalIsOpen}
         onRequestClose={() => setModalIsOpen(false)}

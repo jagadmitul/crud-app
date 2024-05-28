@@ -1,11 +1,19 @@
 import axios from 'axios';
 
 const API_URL = 'https://jsonplaceholder.typicode.com/todos';
+const TOKEN = '';
 
-export const fetchItems = async (page: number, limit: number) => {
-    const response = await axios.get(`${API_URL}?_page=${page}&_limit=${limit}`);
-    return response.data;
-};
+export const fetchItems = async () => {
+    const options = {
+        method: 'GET',
+        headers: {
+            'Authorization': `Bearer ${TOKEN}`
+        },
+    };
+    const response = await fetch(API_URL, options);
+    const data = await response.json();
+    return data.entry.map((item: any) => item.resource);
+}
 
 export const addItem = async (item: any) => {
     const response = await axios.post(API_URL, item);
@@ -18,5 +26,12 @@ export const updateItem = async (id: number, item: any) => {
 };
 
 export const deleteItem = async (id: number) => {
-    await axios.delete(`${API_URL}/${id}`);
+    const response = await fetch(`${API_URL}/${id}`, {
+        method: 'DELETE',
+        headers: {
+            'Authorization': `Bearer ${TOKEN}`
+        },
+    });
+
+    return response.json();
 };
