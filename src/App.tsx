@@ -5,6 +5,7 @@ import ItemModal from './components/ItemModal';
 import ItemTable from './components/ItemTable';
 import { TailSpin } from 'react-loader-spinner';
 import './App.css';
+import ConfirmationModal from './components/ConfirmationModal';
 
 const App: React.FC = () => {
   const [items, setItems] = useState<any[]>([]);
@@ -14,6 +15,8 @@ const App: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [payerOptions, setPayerOptions] = useState<any[]>([]);
   const [selectedPayers, setSelectedPayers] = useState<any[]>([]);
+  const [confirmationModalOpen, setConfirmationModalOpen] = useState(false);
+  const [itemToDelete, setItemToDelete] = useState<any>(null);
 
   useEffect(() => {
     loadItems();
@@ -59,14 +62,23 @@ const App: React.FC = () => {
     }
     setModalIsOpen(false);
     loadItems();
-    setLoading(false);
   };
 
-  const handleDelete = async (id: number) => {
+  const handleDelete = (item: any) => {
+    setItemToDelete(item);
+    setConfirmationModalOpen(true);
+  };
+
+  const handleConfirmDelete = async () => {
     setLoading(true);
-    await deleteItem(id);
+    await deleteItem(itemToDelete.id);
+    setConfirmationModalOpen(false);
     loadItems();
-    setLoading(false);
+  };
+
+  const handleCancelDelete = () => {
+    setConfirmationModalOpen(false);
+    setItemToDelete(null);
   };
 
   return (
@@ -84,6 +96,12 @@ const App: React.FC = () => {
           placeholder="Filter by Payer"
         />
       </div>
+      <ConfirmationModal
+        isOpen={confirmationModalOpen}
+        onConfirm={handleConfirmDelete}
+        onCancel={handleCancelDelete}
+        message={`Are you sure you want to delete the item "${itemToDelete?.name}"?`}
+      />
       {loading ? (
         <div className="flex justify-center">
           <TailSpin height={50} width={50} color="#4A90E2" />
@@ -92,10 +110,12 @@ const App: React.FC = () => {
         <ItemTable items={filteredItems} onEdit={handleEdit} onDelete={handleDelete} />
       )}
       <ItemModal
+        loading={loading}
         isOpen={modalIsOpen}
         onRequestClose={() => setModalIsOpen(false)}
         onSave={handleSave}
         initialData={currentItem}
+        payerOptions={payerOptions}
       />
     </div>
   );
