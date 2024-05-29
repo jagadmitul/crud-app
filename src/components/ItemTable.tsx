@@ -26,10 +26,7 @@ const ItemTable: React.FC<ItemTableProps> = ({ items, onEdit, onDelete }) => {
                         <th className="py-2 px-4 border-b">First name</th>
                         <th className="py-2 px-4 border-b">Last name</th>
                         <th className="py-2 px-4 border-b">Payer</th>
-                        <th className="py-2 px-4 border-b">Email</th>
                         <th className="py-2 px-4 border-b">Phone number</th>
-                        <th className="py-2 px-4 border-b">Gender</th>
-                        <th className="py-2 px-4 border-b">Birth Date</th>
                         <th className="py-2 px-4 border-b">Active</th>
                         <th className="py-2 px-4 border-b">Actions</th>
                     </tr>
@@ -38,13 +35,10 @@ const ItemTable: React.FC<ItemTableProps> = ({ items, onEdit, onDelete }) => {
                     {items.map(item => (
                         <tr key={item.id}>
                             <td className="py-2 px-4 border-b">{item.id}</td>
-                            <td className="py-2 px-4 border-b">{item.name[0]?.given.join(' ')}</td>
+                            <td className="py-2 px-4 border-b">{item.name[0]?.given}</td>
                             <td className="py-2 px-4 border-b">{item.name[0]?.family}</td>
                             <td className="py-2 px-4 border-b">{item.extension[0]?.valueString || ''}</td>
-                            <td className="py-2 px-4 border-b">{item.telecom.find(t => t.system === 'email')?.value || ''}</td>
                             <td className="py-2 px-4 border-b">{item.telecom.find(t => t.system === 'phone')?.value || ''}</td>
-                            <td className="py-2 px-4 border-b">{item.gender}</td>
-                            <td className="py-2 px-4 border-b">{item.birthDate}</td>
                             <td className="py-2 px-4 border-b">{item.active ? 'Yes' : 'No'}</td>
                             <td className="py-2 px-4 border-b">
                                 <button onClick={() => onEdit(item)} className="bg-blue-500 text-white p-2 rounded mr-2">Edit</button>
