@@ -7,7 +7,7 @@ import { Switch } from '@headlessui/react';
 interface ItemModalProps {
     isOpen: boolean;
     onRequestClose: () => void;
-    onSave: (item: any) => void;
+    onSave: (item: any) => Promise<{ success: boolean, message?: string }>;
     initialData?: any;
     payerOptions: { value: string, label: string }[];
 }
@@ -19,20 +19,24 @@ const ItemModal: React.FC<ItemModalProps> = ({ isOpen, onRequestClose, onSave, i
         last_name: '',
         practitioner_id: '',
         payer: '',
+        phone_number: '',
         active: false
     });
+    const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
         if (initialData) {
-            const updatedData = {
+            const phoneNumberObj = initialData.telecom?.find((item: any) => item.system === "phone");
+            const phoneNumber = phoneNumberObj?.value || '';
+            setFormData({
                 id: initialData.id || '',
                 first_name: initialData.name?.[0]?.given || '',
                 last_name: initialData.name?.[0]?.family || '',
                 practitioner_id: initialData.id || '',
                 payer: initialData.extension?.[0]?.valueString || '',
+                phone_number: phoneNumber,
                 active: initialData.active || false,
-            };
-            setFormData(updatedData);
+            });
         }
     }, [initialData]);
 
@@ -49,8 +53,13 @@ const ItemModal: React.FC<ItemModalProps> = ({ isOpen, onRequestClose, onSave, i
         setFormData({ ...formData, active: checked });
     };
 
-    const handleSubmit = () => {
-        onSave(formData);
+    const handleSubmit = async () => {
+        const response = await onSave(formData);
+        if (response.success) {
+            onRequestClose();
+        } else {
+            setError(response.message || 'An error occurred while saving.');
+        }
     };
 
     return (
@@ -60,6 +69,7 @@ const ItemModal: React.FC<ItemModalProps> = ({ isOpen, onRequestClose, onSave, i
                     <h2 className="text-xl">{initialData ? 'Update Item' : 'Add Item'}</h2>
                     <button onClick={onRequestClose} className="text-red-500"><AiOutlineClose size={24} /></button>
                 </div>
+                {error && <div className="text-red-500 mb-4">{error}</div>}
                 <div className="grid grid-cols-2 gap-4">
                     <input
                         type="text"
@@ -79,6 +89,23 @@ const ItemModal: React.FC<ItemModalProps> = ({ isOpen, onRequestClose, onSave, i
                     />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
+                    <Select
+                        options={payerOptions}
+                        onChange={handleSelectChange}
+                        value={payerOptions.find(option => option.value === formData.payer)}
+                        className="w-full mb-2"
+                        placeholder="Select Payer"
+                    />
+                    <input
+                        type="text"
+                        name="phone_number"
+                        value={formData.phone_number}
+                        onChange={handleChange}
+                        placeholder="Phone number"
+                        className="border p-2 mb-2 w-full rounded"
+                    />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
                     {initialData && <input
                         type="text"
                         name="practitioner_id"
@@ -87,29 +114,16 @@ const ItemModal: React.FC<ItemModalProps> = ({ isOpen, onRequestClose, onSave, i
                         placeholder="Practitioner Id"
                         className="border p-2 mb-2 w-full rounded"
                     />}
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                    <Select
-                        options={payerOptions}
-                        onChange={handleSelectChange}
-                        value={payerOptions.find(option => option.value === formData.payer)}
-                        className="w-full mb-2"
-                        placeholder="Select Payer"
-                    />
-                </div>
-                <div className="grid grid-cols-2 gap-4">
                     <div className="flex items-center mb-2">
                         <span className="mr-2">Active:</span>
                         <Switch
                             checked={formData.active}
                             onChange={handleSwitchChange}
-                            className={`${formData.active ? 'bg-blue-600' : 'bg-gray-200'
-                                } relative inline-flex h-6 w-11 items-center rounded-full`}
+                            className={`${formData.active ? 'bg-blue-600' : 'bg-gray-200'} relative inline-flex h-6 w-11 items-center rounded-full`}
                         >
                             <span className="sr-only">Enable active status</span>
                             <span
-                                className={`${formData.active ? 'translate-x-6' : 'translate-x-1'
-                                    } inline-block h-4 w-4 transform bg-white rounded-full`}
+                                className={`${formData.active ? 'translate-x-6' : 'translate-x-1'} inline-block h-4 w-4 transform bg-white rounded-full`}
                             />
                         </Switch>
                     </div>

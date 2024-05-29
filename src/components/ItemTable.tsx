@@ -38,7 +38,6 @@ const ItemTable: React.FC<ItemTableProps> = ({ items, onEdit, onDelete }) => {
                             <td className="py-2 px-4 border-b">{item.name[0]?.given}</td>
                             <td className="py-2 px-4 border-b">{item.name[0]?.family}</td>
                             <td className="py-2 px-4 border-b">{item.extension[0]?.valueString || ''}</td>
-                           
                             <td className="py-2 px-4 border-b">{item.telecom.find(t => t.system === 'phone')?.value || ''}</td>
                             <td className="py-2 px-4 border-b">{item.active ? 'Yes' : 'No'}</td>
                             <td className="py-2 px-4 border-b">
