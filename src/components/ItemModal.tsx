@@ -13,30 +13,27 @@ interface ItemModalProps {
 }
 
 const ItemModal: React.FC<ItemModalProps> = ({ isOpen, onRequestClose, onSave, initialData, payerOptions }) => {
-    const [formData, setFormData] = useState(initialData || {
+    const [formData, setFormData] = useState({
+        id: '',
         first_name: '',
         last_name: '',
         practitioner_id: '',
-        phone_number: '',
         payer: '',
-        active: false,
-        email: '',
-        gender: '',
-        birthDate: ''
+        active: false
     });
 
     useEffect(() => {
-        setFormData(initialData || {
-            first_name: '',
-            last_name: '',
-            practitioner_id: '',
-            phone_number: '',
-            payer: '',
-            active: false,
-            email: '',
-            gender: '',
-            birthDate: ''
-        });
+        if (initialData) {
+            const updatedData = {
+                id: initialData.id || '',
+                first_name: initialData.name?.[0]?.given || '',
+                last_name: initialData.name?.[0]?.family || '',
+                practitioner_id: initialData.id || '',
+                payer: initialData.extension?.[0]?.valueString || '',
+                active: initialData.active || false,
+            };
+            setFormData(updatedData);
+        }
     }, [initialData]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -90,14 +87,6 @@ const ItemModal: React.FC<ItemModalProps> = ({ isOpen, onRequestClose, onSave, i
                         placeholder="Practitioner Id"
                         className="border p-2 mb-2 w-full rounded"
                     />}
-                    <input
-                        type="text"
-                        name="phone_number"
-                        value={formData.phone_number}
-                        onChange={handleChange}
-                        placeholder="Phone number"
-                        className="border p-2 mb-2 w-full rounded"
-                    />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                     <Select
@@ -107,6 +96,8 @@ const ItemModal: React.FC<ItemModalProps> = ({ isOpen, onRequestClose, onSave, i
                         className="w-full mb-2"
                         placeholder="Select Payer"
                     />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
                     <div className="flex items-center mb-2">
                         <span className="mr-2">Active:</span>
                         <Switch
@@ -122,53 +113,6 @@ const ItemModal: React.FC<ItemModalProps> = ({ isOpen, onRequestClose, onSave, i
                             />
                         </Switch>
                     </div>
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                    <input
-                        type="text"
-                        name="email"
-                        value={formData.email}
-                        onChange={handleChange}
-                        placeholder="Email"
-                        className="border p-2 mb-2 w-full rounded"
-                    />
-                    <div className="grid grid-cols-2 gap-4">
-                        <div className="flex items-center">
-                            <label className="mr-2">Gender:</label>
-                            <label className="mr-2">
-                                <input
-                                    type="radio"
-                                    name="gender"
-                                    value="male"
-                                    checked={formData.gender === 'male'}
-                                    onChange={handleChange}
-                                    className="mr-1"
-                                />
-                                Male
-                            </label>
-                            <label>
-                                <input
-                                    type="radio"
-                                    name="gender"
-                                    value="female"
-                                    checked={formData.gender === 'female'}
-                                    onChange={handleChange}
-                                    className="mr-1"
-                                />
-                                Female
-                            </label>
-                        </div>
-                    </div>
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                    <input
-                        type="date"
-                        name="birthDate"
-                        value={formData.birthDate}
-                        onChange={handleChange}
-                        placeholder="Birth Date"
-                        className="border p-2 mb-2 w-full rounded"
-                    />
                 </div>
                 <div className="flex justify-end">
                     <button onClick={handleSubmit} className="bg-blue-500 text-white p-2 rounded mr-2">Save</button>
