@@ -15,37 +15,37 @@ export const fetchItems = async () => {
 
 export const addItem = async (item: any) => {
   const body = JSON.stringify({
+    resourceType: "Practitioner",
     extension: [
       {
         url: "payer name",
-        valueString: "Fidelis"
-      }
+        valueString: item.payer,
+      },
     ],
     identifier: [
       {
-        system: "http://hl7.org/fhir/sid/us-npi",
-        value: "1234567890"
-      }
+        system: "http://hl7.org/fhir/sid/us-npi"
+      },
     ],
-    active: true,
+    active: item.active,
     name: [
       {
-        family: "Last",
-        given: [
-          "First"
-        ]
-      }
+        family: item.last_name,
+        given: [item.first_name],
+      },
     ],
     telecom: [
       {
-        system: "email"
+        system: "email",
+        value: item.email,
       },
       {
-        system: "phone"
-      }
+        system: "phone",
+        value: item.phone_number,
+      },
     ],
-    gender: "male",
-    birthDate: "1969-12-09"
+    gender: item.gender,
+    birthDate: item.birthDate,
   });
 
   const response = await fetch(API_URL, {
@@ -62,37 +62,39 @@ export const addItem = async (item: any) => {
 
 export const updateItem = async (id: number, item: any) => {
   const body = JSON.stringify({
+    resourceType: "Practitioner",
     extension: [
       {
         url: "payer name",
-        valueString: "Fidelis"
-      }
+        valueString: item.payer,
+      },
     ],
     identifier: [
       {
         system: "http://hl7.org/fhir/sid/us-npi",
-        value: "1234567890"
-      }
+        value: item.practitioner_id,
+      },
     ],
-    active: true,
+    active: item.active,
+    id: id,
     name: [
       {
-        family: "Last",
-        given: [
-          "First"
-        ]
-      }
+        family: item.last_name,
+        given: [item.first_name],
+      },
     ],
     telecom: [
       {
-        system: "email"
+        system: "email",
+        value: item.email,
       },
       {
-        system: "phone"
-      }
+        system: "phone",
+        value: item.phone_number,
+      },
     ],
-    gender: "male",
-    birthDate: "1969-12-09"
+    gender: item.gender,
+    birthDate: item.birthDate,
   });
 
   const response = await fetch(`${API_URL}/${id}`, {

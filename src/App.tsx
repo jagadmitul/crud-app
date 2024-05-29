@@ -96,6 +96,7 @@ const App: React.FC = () => {
         onRequestClose={() => setModalIsOpen(false)}
         onSave={handleSave}
         initialData={currentItem}
+        payerOptions={payerOptions}
       />
     </div>
   );

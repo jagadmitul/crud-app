@@ -1,24 +1,55 @@
 import React, { useState, useEffect } from 'react';
 import Modal from 'react-modal';
 import { AiOutlineClose } from 'react-icons/ai';
+import Select from 'react-select';
+import { Switch } from '@headlessui/react';
 
 interface ItemModalProps {
     isOpen: boolean;
     onRequestClose: () => void;
     onSave: (item: any) => void;
     initialData?: any;
+    payerOptions: { value: string, label: string }[];
 }
 
-const ItemModal: React.FC<ItemModalProps> = ({ isOpen, onRequestClose, onSave, initialData }) => {
-    const [formData, setFormData] = useState(initialData || { name: '', description: '' });
+const ItemModal: React.FC<ItemModalProps> = ({ isOpen, onRequestClose, onSave, initialData, payerOptions }) => {
+    const [formData, setFormData] = useState(initialData || {
+        first_name: '',
+        last_name: '',
+        practitioner_id: '',
+        phone_number: '',
+        payer: '',
+        active: false,
+        email: '',
+        gender: '',
+        birthDate: ''
+    });
 
     useEffect(() => {
-        setFormData(initialData || { name: '', description: '' });
+        setFormData(initialData || {
+            first_name: '',
+            last_name: '',
+            practitioner_id: '',
+            phone_number: '',
+            payer: '',
+            active: false,
+            email: '',
+            gender: '',
+            birthDate: ''
+        });
     }, [initialData]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
         setFormData({ ...formData, [name]: value });
+    };
+
+    const handleSelectChange = (selectedOption: any) => {
+        setFormData({ ...formData, payer: selectedOption.value });
+    };
+
+    const handleSwitchChange = (checked: boolean) => {
+        setFormData({ ...formData, active: checked });
     };
 
     const handleSubmit = () => {
@@ -51,14 +82,14 @@ const ItemModal: React.FC<ItemModalProps> = ({ isOpen, onRequestClose, onSave, i
                     />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
-                    <input
+                    {initialData && <input
                         type="text"
                         name="practitioner_id"
                         value={formData.practitioner_id}
                         onChange={handleChange}
                         placeholder="Practitioner Id"
                         className="border p-2 mb-2 w-full rounded"
-                    />
+                    />}
                     <input
                         type="text"
                         name="phone_number"
@@ -69,20 +100,73 @@ const ItemModal: React.FC<ItemModalProps> = ({ isOpen, onRequestClose, onSave, i
                     />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
+                    <Select
+                        options={payerOptions}
+                        onChange={handleSelectChange}
+                        value={payerOptions.find(option => option.value === formData.payer)}
+                        className="w-full mb-2"
+                        placeholder="Select Payer"
+                    />
+                    <div className="flex items-center mb-2">
+                        <span className="mr-2">Active:</span>
+                        <Switch
+                            checked={formData.active}
+                            onChange={handleSwitchChange}
+                            className={`${formData.active ? 'bg-blue-600' : 'bg-gray-200'
+                                } relative inline-flex h-6 w-11 items-center rounded-full`}
+                        >
+                            <span className="sr-only">Enable active status</span>
+                            <span
+                                className={`${formData.active ? 'translate-x-6' : 'translate-x-1'
+                                    } inline-block h-4 w-4 transform bg-white rounded-full`}
+                            />
+                        </Switch>
+                    </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
                     <input
                         type="text"
-                        name="payer"
-                        value={formData.payer}
+                        name="email"
+                        value={formData.email}
                         onChange={handleChange}
-                        placeholder="Payer"
+                        placeholder="Email"
                         className="border p-2 mb-2 w-full rounded"
                     />
+                    <div className="grid grid-cols-2 gap-4">
+                        <div className="flex items-center">
+                            <label className="mr-2">Gender:</label>
+                            <label className="mr-2">
+                                <input
+                                    type="radio"
+                                    name="gender"
+                                    value="male"
+                                    checked={formData.gender === 'male'}
+                                    onChange={handleChange}
+                                    className="mr-1"
+                                />
+                                Male
+                            </label>
+                            <label>
+                                <input
+                                    type="radio"
+                                    name="gender"
+                                    value="female"
+                                    checked={formData.gender === 'female'}
+                                    onChange={handleChange}
+                                    className="mr-1"
+                                />
+                                Female
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
                     <input
-                        type="text"
-                        name="active"
-                        value={formData.active}
+                        type="date"
+                        name="birthDate"
+                        value={formData.birthDate}
                         onChange={handleChange}
-                        placeholder="Active"
+                        placeholder="Birth Date"
                         className="border p-2 mb-2 w-full rounded"
                     />
                 </div>
