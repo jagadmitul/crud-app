@@ -48,7 +48,7 @@ export const addItem = async (item: any) => {
     body: body,
   });
 
-  return response.json();
+  return response;
 };
 
 export const updateItem = async (id: number, item: any) => {
@@ -91,7 +91,7 @@ export const updateItem = async (id: number, item: any) => {
     body: body,
   });
 
-  return response.json();
+  return response;
 };
 
 export const deleteItem = async (id: number) => {
@@ -101,5 +101,5 @@ export const deleteItem = async (id: number) => {
       Authorization: `Bearer ${import.meta.env.VITE_TOKEN}`,
     },
   });
-  return response.json();
+  return response;
 };

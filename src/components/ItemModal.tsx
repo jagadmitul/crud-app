@@ -3,16 +3,18 @@ import Modal from 'react-modal';
 import { AiOutlineClose } from 'react-icons/ai';
 import Select from 'react-select';
 import { Switch } from '@headlessui/react';
+import { TailSpin } from 'react-loader-spinner';
 
 interface ItemModalProps {
+    loading: boolean;
     isOpen: boolean;
     onRequestClose: () => void;
-    onSave: (item: any) => Promise<{ success: boolean, message?: string }>;
+    onSave: (item: any) => Promise<{ success: boolean, message?: string, status?: number }>;
     initialData?: any;
     payerOptions: { value: string, label: string }[];
 }
 
-const ItemModal: React.FC<ItemModalProps> = ({ isOpen, onRequestClose, onSave, initialData, payerOptions }) => {
+const ItemModal: React.FC<ItemModalProps> = ({ loading, isOpen, onRequestClose, onSave, initialData, payerOptions }) => {
     const [formData, setFormData] = useState({
         id: '',
         first_name: '',
@@ -54,12 +56,11 @@ const ItemModal: React.FC<ItemModalProps> = ({ isOpen, onRequestClose, onSave, i
     };
 
     const handleSubmit = async () => {
-        const response = await onSave(formData);
-        if (response.success) {
-            onRequestClose();
-        } else {
-            setError(response.message || 'An error occurred while saving.');
-        }
+        await onSave(formData).then(res => {
+            if (res?.status !== 200) {
+                setError(res.message || 'An error occurred while saving.');
+            }
+        })
     };
 
     return (
@@ -129,7 +130,10 @@ const ItemModal: React.FC<ItemModalProps> = ({ isOpen, onRequestClose, onSave, i
                     </div>
                 </div>
                 <div className="flex justify-end">
-                    <button onClick={handleSubmit} className="bg-blue-500 text-white p-2 rounded mr-2">Save</button>
+                    <button onClick={handleSubmit} className="bg-blue-500 text-white p-2 rounded mr-2 flex items-center">
+                        {loading && <span className='mr-2'><TailSpin height={20} width={20} color="#ffff" /></span>}
+                        Save
+                    </button>
                     <button onClick={onRequestClose} className="bg-gray-500 text-white p-2 rounded">Cancel</button>
                 </div>
             </div>
