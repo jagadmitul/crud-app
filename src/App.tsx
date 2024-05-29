@@ -27,14 +27,14 @@ const App: React.FC = () => {
     setLoading(true);
     const data = await fetchItems();
     setItems(data);
-    setPayerOptions([...new Set(data.map((item: any) => item.payer))].map((payer: string) => ({ value: payer, label: payer })));
+    setPayerOptions([...new Set(data.map((item: any) => item.extension[0]?.valueString))].map((payer: string) => ({ value: payer, label: payer })));
     setLoading(false);
   };
 
   const filterItems = () => {
     if (selectedPayers.length > 0) {
       const selectedPayerValues = selectedPayers.map(payer => payer.value);
-      setFilteredItems(items.filter(item => selectedPayerValues.includes(item.payer)));
+      setFilteredItems(items.filter(item => selectedPayerValues.includes(item.extension[0]?.valueString)));
     } else {
       setFilteredItems(items);
     }
@@ -72,7 +72,7 @@ const App: React.FC = () => {
   return (
     <div className="container mx-auto p-4">
       <div className="flex justify-between mb-4">
-        <h1 className="text-2xl mb-4">CRUD Application</h1>
+        <h1 className="text-2xl mb-4">FHIR Integrated App</h1>
         <button onClick={handleAdd} className="bg-green-500 text-white p-2 rounded">Add Item</button>
       </div>
       <div className="mb-4">

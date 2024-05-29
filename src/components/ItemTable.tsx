@@ -7,6 +7,7 @@ interface ItemTableProps {
 }
 
 const ItemTable: React.FC<ItemTableProps> = ({ items, onEdit, onDelete }) => {
+    console.log("items",items[0]?.active)
     return (
         <div className="overflow-x-auto">
             <table className="min-w-full bg-white">
@@ -22,13 +23,13 @@ const ItemTable: React.FC<ItemTableProps> = ({ items, onEdit, onDelete }) => {
                     </tr>
                 </thead>
                 <tbody>
-                    {items.map(item => (
+                    {items?.map(item => (
                         <tr key={item.id}>
-                            <td className="py-2 px-4 border-b">{item.first_name}</td>
-                            <td className="py-2 px-4 border-b">{item.last_name}</td>
-                            <td className="py-2 px-4 border-b">{item.practitioner_id}</td>
-                            <td className="py-2 px-4 border-b">{item.phone_number}</td>
-                            <td className="py-2 px-4 border-b">{item.payer}</td>
+                            <td className="py-2 px-4 border-b">{item.name[0]?.given}</td>
+                            <td className="py-2 px-4 border-b">{item.name[0]?.family}</td>
+                            <td className="py-2 px-4 border-b">{item.id}</td>
+                            <td className="py-2 px-4 border-b">{item.telecom[1]?.value}</td>
+                            <td className="py-2 px-4 border-b">{item.extension[0].valueString}</td>
                             <td className="py-2 px-4 border-b">{item.active}</td>
                             <td className="py-2 px-4 border-b">
                                 <button onClick={() => onEdit(item)} className="bg-blue-500 text-white p-2 rounded mr-2">Edit</button>
