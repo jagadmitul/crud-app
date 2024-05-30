@@ -74,6 +74,7 @@ const App: React.FC = () => {
     setLoading(true);
     await deleteItem(itemToDelete.id);
     setConfirmationModalOpen(false);
+    setItemToDelete(null);
     loadItems(searchTerm);
   };
 
@@ -108,7 +109,7 @@ const App: React.FC = () => {
         isOpen={confirmationModalOpen}
         onConfirm={handleConfirmDelete}
         onCancel={handleCancelDelete}
-        message={`Are you sure you want to delete the item "${itemToDelete?.name}"?`}
+        message={`Are you sure you want to delete the item "${itemToDelete?.id}"?`}
       />
       {loading ? (
         <div className="flex justify-center">

@@ -39,16 +39,6 @@ const ItemModal: React.FC<ItemModalProps> = ({ loading, isOpen, onRequestClose, 
                 phone_number: phoneNumber,
                 active: initialData.active || false,
             });
-        } else {
-            setFormData({
-                id: '',
-                first_name: '',
-                last_name: '',
-                practitioner_id: '',
-                payer: '',
-                phone_number: '',
-                active: false
-            });
         }
     }, [initialData]);
 
@@ -69,6 +59,16 @@ const ItemModal: React.FC<ItemModalProps> = ({ loading, isOpen, onRequestClose, 
         await onSave(formData).then(res => {
             if (res?.status !== 200) {
                 setError(res.message || 'An error occurred while saving.');
+            } else {
+                setFormData({
+                    id: '',
+                    first_name: '',
+                    last_name: '',
+                    practitioner_id: '',
+                    payer: '',
+                    phone_number: '',
+                    active: false
+                });
             }
         })
     };
