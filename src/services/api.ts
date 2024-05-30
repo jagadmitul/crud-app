@@ -1,11 +1,15 @@
-export const fetchItems = async () => {
+export const fetchItems = async (searchTerm: string = '') => {
   const options = {
     method: "GET",
     headers: {
       Authorization: `Bearer ${import.meta.env.VITE_TOKEN}`,
     },
   };
-  const response = await fetch(import.meta.env.VITE_API_URL, options);
+  let url = import.meta.env.VITE_API_URL;
+  if (searchTerm) {
+    url += `?given=${searchTerm}`;
+  }
+  const response = await fetch(url, options);
   const data = await response.json();
   return data.entry.map((item: any) => item.resource);
 };
