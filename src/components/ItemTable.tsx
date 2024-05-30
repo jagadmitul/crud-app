@@ -13,7 +13,7 @@ interface Item {
 interface ItemTableProps {
     items: Item[];
     onEdit: (item: Item) => void;
-    onDelete: (id: number) => void;
+    onDelete: (item: Item) => void;
 }
 
 const ItemTable: React.FC<ItemTableProps> = ({ items, onEdit, onDelete }) => {
@@ -42,7 +42,7 @@ const ItemTable: React.FC<ItemTableProps> = ({ items, onEdit, onDelete }) => {
                             <td className="py-2 px-4 border-b text-left">{item.active ? 'Yes' : 'No'}</td>
                             <td className="py-2 px-4 border-b text-left">
                                 <button onClick={() => onEdit(item)} className="bg-blue-500 text-white p-2 rounded mr-2">Edit</button>
-                                <button onClick={() => onDelete(item.id)} className="bg-red-500 text-white p-2 rounded">Delete</button>
+                                <button onClick={() => onDelete(item)} className="bg-red-500 text-white p-2 rounded">Delete</button>
                             </td>
                         </tr>
                     ))}
