@@ -17,18 +17,19 @@ const App: React.FC = () => {
   const [selectedPayers, setSelectedPayers] = useState<any[]>([]);
   const [confirmationModalOpen, setConfirmationModalOpen] = useState(false);
   const [itemToDelete, setItemToDelete] = useState<any>(null);
+  const [searchTerm, setSearchTerm] = useState<string>('');
 
   useEffect(() => {
-    loadItems();
-  }, []);
+    loadItems(searchTerm);
+  }, [searchTerm]);
 
   useEffect(() => {
     filterItems();
   }, [selectedPayers, items]);
 
-  const loadItems = async () => {
+  const loadItems = async (searchTerm: string = '') => {
     setLoading(true);
-    const data = await fetchItems();
+    const data = await fetchItems(searchTerm);
     setItems(data);
     setPayerOptions([...new Set(data.map((item: any) => item.extension[0]?.valueString))].map((payer: string) => ({ value: payer, label: payer })));
     setLoading(false);
@@ -61,7 +62,7 @@ const App: React.FC = () => {
       await addItem(item);
     }
     setModalIsOpen(false);
-    loadItems();
+    loadItems(searchTerm);
   };
 
   const handleDelete = (item: any) => {
@@ -73,7 +74,7 @@ const App: React.FC = () => {
     setLoading(true);
     await deleteItem(itemToDelete.id);
     setConfirmationModalOpen(false);
-    loadItems();
+    loadItems(searchTerm);
   };
 
   const handleCancelDelete = () => {
@@ -87,7 +88,14 @@ const App: React.FC = () => {
         <h1 className="text-2xl mb-4">FHIR Integrated App</h1>
         <button onClick={handleAdd} className="bg-green-500 text-white p-2 rounded">Add Item</button>
       </div>
-      <div className="mb-4">
+      <div className="mb-4 flex">
+        <input 
+          type="text" 
+          value={searchTerm} 
+          onChange={(e) => setSearchTerm(e.target.value)} 
+          placeholder="Search by first name"
+          className="border p-2 mb-4 mr-4"
+        />
         <Select
           isMulti
           options={payerOptions}
