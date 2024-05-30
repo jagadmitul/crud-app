@@ -1,4 +1,4 @@
-export const fetchItems = async (searchTerm: string = '') => {
+export const fetchItems = async (searchTerm: string = "") => {
   const options = {
     method: "GET",
     headers: {
@@ -7,7 +7,7 @@ export const fetchItems = async (searchTerm: string = '') => {
   };
   let url = import.meta.env.VITE_API_URL;
   if (searchTerm) {
-    url += `?given=${searchTerm}`;
+    url += `?name.given=${searchTerm}`;
   }
   const response = await fetch(url, options);
   const data = await response.json();
@@ -25,7 +25,7 @@ export const addItem = async (item: any) => {
     ],
     identifier: [
       {
-        system: "http://h17.org/fhir/sid/us-npi"
+        system: "http://h17.org/fhir/sid/us-npi",
       },
     ],
     active: item.active,
@@ -40,7 +40,7 @@ export const addItem = async (item: any) => {
         system: "phone",
         value: item.phone_number,
       },
-    ]
+    ],
   });
 
   const response = await fetch(import.meta.env.VITE_API_URL, {
@@ -83,7 +83,7 @@ export const updateItem = async (id: number, item: any) => {
         system: "phone",
         value: item.phone_number,
       },
-    ]
+    ],
   });
 
   const response = await fetch(`${import.meta.env.VITE_API_URL}/${id}`, {
