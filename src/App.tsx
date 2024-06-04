@@ -27,6 +27,11 @@ const App: React.FC = () => {
     filterItems();
   }, [selectedPayers, items]);
 
+  const handleModalClose = () => {
+    setModalIsOpen(false)
+    setCurrentItem(null);
+  }
+
   const loadItems = async (searchTerm: string = '') => {
     setLoading(true);
     const data = await fetchItems(searchTerm);
@@ -121,7 +126,7 @@ const App: React.FC = () => {
       <ItemModal
         loading={loading}
         isOpen={modalIsOpen}
-        onRequestClose={() => setModalIsOpen(false)}
+        onRequestClose={handleModalClose}
         onSave={handleSave}
         initialData={currentItem}
         payerOptions={payerOptions}
