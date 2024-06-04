@@ -5,6 +5,7 @@ import ItemModal from './components/ItemModal';
 import ItemTable from './components/ItemTable';
 import { TailSpin } from 'react-loader-spinner';
 import './App.css';
+import ConfirmationModal from './components/ConfirmationModal';
 
 const App: React.FC = () => {
   const [items, setItems] = useState<any[]>([]);
@@ -14,18 +15,26 @@ const App: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [payerOptions, setPayerOptions] = useState<any[]>([]);
   const [selectedPayers, setSelectedPayers] = useState<any[]>([]);
+  const [confirmationModalOpen, setConfirmationModalOpen] = useState(false);
+  const [itemToDelete, setItemToDelete] = useState<any>(null);
+  const [searchTerm, setSearchTerm] = useState<string>('');
 
   useEffect(() => {
-    loadItems();
-  }, []);
+    loadItems(searchTerm);
+  }, [searchTerm]);
 
   useEffect(() => {
     filterItems();
   }, [selectedPayers, items]);
 
-  const loadItems = async () => {
+  const handleModalClose = () => {
+    setModalIsOpen(false)
+    setCurrentItem(null);
+  }
+
+  const loadItems = async (searchTerm: string = '') => {
     setLoading(true);
-    const data = await fetchItems();
+    const data = await fetchItems(searchTerm);
     setItems(data);
     setPayerOptions([...new Set(data.map((item: any) => item.extension[0]?.valueString))].map((payer: string) => ({ value: payer, label: payer })));
     setLoading(false);
@@ -58,15 +67,25 @@ const App: React.FC = () => {
       await addItem(item);
     }
     setModalIsOpen(false);
-    loadItems();
-    setLoading(false);
+    loadItems(searchTerm);
   };
 
-  const handleDelete = async (id: number) => {
+  const handleDelete = (item: any) => {
+    setItemToDelete(item);
+    setConfirmationModalOpen(true);
+  };
+
+  const handleConfirmDelete = async () => {
     setLoading(true);
-    await deleteItem(id);
-    loadItems();
-    setLoading(false);
+    await deleteItem(itemToDelete.id);
+    setConfirmationModalOpen(false);
+    setItemToDelete(null);
+    loadItems(searchTerm);
+  };
+
+  const handleCancelDelete = () => {
+    setConfirmationModalOpen(false);
+    setItemToDelete(null);
   };
 
   return (
@@ -75,7 +94,14 @@ const App: React.FC = () => {
         <h1 className="text-2xl mb-4">FHIR Integrated App</h1>
         <button onClick={handleAdd} className="bg-green-500 text-white p-2 rounded">Add Item</button>
       </div>
-      <div className="mb-4">
+      <div className="mb-4 flex">
+        <input 
+          type="text" 
+          value={searchTerm} 
+          onChange={(e) => setSearchTerm(e.target.value)} 
+          placeholder="Search by first name"
+          className="border p-2 mb-4 mr-4"
+        />
         <Select
           isMulti
           options={payerOptions}
@@ -84,6 +110,12 @@ const App: React.FC = () => {
           placeholder="Filter by Payer"
         />
       </div>
+      <ConfirmationModal
+        isOpen={confirmationModalOpen}
+        onConfirm={handleConfirmDelete}
+        onCancel={handleCancelDelete}
+        message={`Are you sure you want to delete the item "${itemToDelete?.id}"?`}
+      />
       {loading ? (
         <div className="flex justify-center">
           <TailSpin height={50} width={50} color="#4A90E2" />
@@ -92,10 +124,12 @@ const App: React.FC = () => {
         <ItemTable items={filteredItems} onEdit={handleEdit} onDelete={handleDelete} />
       )}
       <ItemModal
+        loading={loading}
         isOpen={modalIsOpen}
-        onRequestClose={() => setModalIsOpen(false)}
+        onRequestClose={handleModalClose}
         onSave={handleSave}
         initialData={currentItem}
+        payerOptions={payerOptions}
       />
     </div>
   );

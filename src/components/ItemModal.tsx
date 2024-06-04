@@ -1,19 +1,55 @@
 import React, { useState, useEffect } from 'react';
 import Modal from 'react-modal';
 import { AiOutlineClose } from 'react-icons/ai';
+import Select from 'react-select';
+import { Switch } from '@headlessui/react';
+import { TailSpin } from 'react-loader-spinner';
 
 interface ItemModalProps {
+    loading: boolean;
     isOpen: boolean;
     onRequestClose: () => void;
-    onSave: (item: any) => void;
+    onSave: (item: any) => Promise<{ success: boolean, message?: string, status?: number }>;
     initialData?: any;
+    payerOptions: { value: string, label: string }[];
 }
 
-const ItemModal: React.FC<ItemModalProps> = ({ isOpen, onRequestClose, onSave, initialData }) => {
-    const [formData, setFormData] = useState(initialData || { name: '', description: '' });
+const ItemModal: React.FC<ItemModalProps> = ({ loading, isOpen, onRequestClose, onSave, initialData, payerOptions }) => {
+    const [formData, setFormData] = useState({
+        id: '',
+        first_name: '',
+        last_name: '',
+        practitioner_id: '',
+        payer: '',
+        phone_number: '',
+        active: false
+    });
+    const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
-        setFormData(initialData || { name: '', description: '' });
+        if (initialData) {
+            const phoneNumberObj = initialData.telecom?.find((item: any) => item.system === "phone");
+            const phoneNumber = phoneNumberObj?.value || '';
+            setFormData({
+                id: initialData.id || '',
+                first_name: initialData.name?.[0]?.given || '',
+                last_name: initialData.name?.[0]?.family || '',
+                practitioner_id: initialData.id || '',
+                payer: initialData.extension?.[0]?.valueString || '',
+                phone_number: phoneNumber,
+                active: initialData.active || false,
+            });
+        } else {
+            setFormData({
+                id: '',
+                first_name: '',
+                last_name: '',
+                practitioner_id: '',
+                payer: '',
+                phone_number: '',
+                active: false
+            });
+        }
     }, [initialData]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -21,8 +57,30 @@ const ItemModal: React.FC<ItemModalProps> = ({ isOpen, onRequestClose, onSave, i
         setFormData({ ...formData, [name]: value });
     };
 
-    const handleSubmit = () => {
-        onSave(formData);
+    const handleSelectChange = (selectedOption: any) => {
+        setFormData({ ...formData, payer: selectedOption.value });
+    };
+
+    const handleSwitchChange = (checked: boolean) => {
+        setFormData({ ...formData, active: checked });
+    };
+
+    const handleSubmit = async () => {
+        await onSave(formData).then(res => {
+            if (res?.status !== 200) {
+                setError(res.message || 'An error occurred while saving.');
+            } else {
+                setFormData({
+                    id: '',
+                    first_name: '',
+                    last_name: '',
+                    practitioner_id: '',
+                    payer: '',
+                    phone_number: '',
+                    active: false
+                });
+            }
+        })
     };
 
     return (
@@ -32,6 +90,7 @@ const ItemModal: React.FC<ItemModalProps> = ({ isOpen, onRequestClose, onSave, i
                     <h2 className="text-xl">{initialData ? 'Update Item' : 'Add Item'}</h2>
                     <button onClick={onRequestClose} className="text-red-500"><AiOutlineClose size={24} /></button>
                 </div>
+                {error && <div className="text-red-500 mb-4">{error}</div>}
                 <div className="grid grid-cols-2 gap-4">
                     <input
                         type="text"
@@ -51,13 +110,12 @@ const ItemModal: React.FC<ItemModalProps> = ({ isOpen, onRequestClose, onSave, i
                     />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
-                    <input
-                        type="text"
-                        name="practitioner_id"
-                        value={formData.practitioner_id}
-                        onChange={handleChange}
-                        placeholder="Practitioner Id"
-                        className="border p-2 mb-2 w-full rounded"
+                    <Select
+                        options={payerOptions}
+                        onChange={handleSelectChange}
+                        value={payerOptions.find(option => option.value === formData.payer)}
+                        className="w-full mb-2"
+                        placeholder="Select Payer"
                     />
                     <input
                         type="text"
@@ -69,25 +127,33 @@ const ItemModal: React.FC<ItemModalProps> = ({ isOpen, onRequestClose, onSave, i
                     />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
-                    <input
+                    {initialData && <input
                         type="text"
-                        name="payer"
-                        value={formData.payer}
+                        name="practitioner_id"
+                        value={formData.practitioner_id}
                         onChange={handleChange}
-                        placeholder="Payer"
+                        placeholder="Practitioner Id"
                         className="border p-2 mb-2 w-full rounded"
-                    />
-                    <input
-                        type="text"
-                        name="active"
-                        value={formData.active}
-                        onChange={handleChange}
-                        placeholder="Active"
-                        className="border p-2 mb-2 w-full rounded"
-                    />
+                    />}
+                    <div className="flex items-center mb-2">
+                        <span className="mr-2">Active:</span>
+                        <Switch
+                            checked={formData.active}
+                            onChange={handleSwitchChange}
+                            className={`${formData.active ? 'bg-blue-600' : 'bg-gray-200'} relative inline-flex h-6 w-11 items-center rounded-full`}
+                        >
+                            <span className="sr-only">Enable active status</span>
+                            <span
+                                className={`${formData.active ? 'translate-x-6' : 'translate-x-1'} inline-block h-4 w-4 transform bg-white rounded-full`}
+                            />
+                        </Switch>
+                    </div>
                 </div>
                 <div className="flex justify-end">
-                    <button onClick={handleSubmit} className="bg-blue-500 text-white p-2 rounded mr-2">Save</button>
+                    <button onClick={handleSubmit} className="bg-blue-500 text-white p-2 rounded mr-2 flex items-center">
+                        {loading && <span className='mr-2'><TailSpin height={20} width={20} color="#ffff" /></span>}
+                        Save
+                    </button>
                     <button onClick={onRequestClose} className="bg-gray-500 text-white p-2 rounded">Cancel</button>
                 </div>
             </div>
